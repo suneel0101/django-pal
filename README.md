@@ -12,6 +12,11 @@ Instructions
 
 1. `git clone git://github.com/suneel0101/django-pal.git && cd django-pal`
 2. `python create.py --path="/path/to/proj/directory/" --name="your-project-name"`
+Now, your application is deployed to Heroku. Now, setup your local development enviornment:
+3. `cd /path/to/proj/directory`
+4. `pip install -r requirements.txt`
+5. `python manage.py runserver`
+Your application will be running locally at 127.0.0.1:8000.
 
 Dependencies
 ============
