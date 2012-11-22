@@ -10,7 +10,7 @@ All the code is in the create.py script. It's very straightforward, so please ta
 Instructions
 ===========
 
-1. `git clone git://github.com/suneel0101/django-pal.git`
+1. `git clone git://github.com/suneel0101/django-pal.git && cd django-pal`
 2. `python create.py --path="/path/to/proj/directory/" --name="your-project-name"`
 
 Dependencies
