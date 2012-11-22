@@ -21,6 +21,10 @@ class Command(object):
         parser.add_option("-t", "--template", dest="template",
                           action="store", type="string",
                           help="project template path or URL")
+        parser.add_option("-e", "--emailer", dest="emailer",
+                          action="store_true",
+                          help="add the emailer app")
+
 
         (options, args) = parser.parse_args()
 
@@ -37,9 +41,11 @@ class Command(object):
 
         self.prepare()
         self.create_project()
+        if options.emailer:
+            self.add_emailer()
         # Change directory into newly created project directory
         os.chdir(self.full_destination)
-        self.deploy()
+        #self.deploy()
 
     def prepare(self):
         """
@@ -66,6 +72,13 @@ class Command(object):
                 self.template, self.name, self.full_destination))
         run('touch {}/settings/active.py'.format(
                 self.full_destination, self.name))
+
+    def add_emailer(self):
+        EMAILER_TEMPLATE = "https://github.com/suneel0101/django-emailer/archive/master.zip"
+        emailer_destination = '{}/apps/emailer'.format(self.full_destination)
+        run('mkdir {}'.format(emailer_destination))
+        run('django-admin.py startapp emailer {} --template={}'.format(
+                emailer_destination, EMAILER_TEMPLATE))
 
     def deploy(self):
         """
