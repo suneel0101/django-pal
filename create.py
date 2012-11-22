@@ -24,7 +24,8 @@ class Command(object):
 
         (options, args) = parser.parse_args()
 
-        self.template = options.template or 'https://github.com/suneel0101/django-foundation/archive/master.zip'
+        DEFAULT_TEMPLATE = 'https://github.com/suneel0101/django-foundation/archive/master.zip'
+        self.template = options.template or DEFAULT_TEMPLATE
         self.name = options.name
         self.destination = options.path
 
@@ -37,10 +38,8 @@ class Command(object):
         self.prepare()
         self.create_project()
         # Change directory into newly created project directory
-        import pdb; pdb.set_trace()
         os.chdir(self.full_destination)
         self.deploy()
-
 
     def prepare(self):
         """
@@ -53,24 +52,20 @@ class Command(object):
         run('source venv/bin/activate')
         run('pip install django')
 
-
     def create_project(self):
         """
         Create Django project according to `template` at `destination`
         with project name `name`
         Create active.py, which will be git ignored
         """
-
-
         original_cwd = os.getcwd()
         os.chdir(self.destination)
         run('mkdir {}'.format(self.name))
         os.chdir(original_cwd)
         run(u'django-admin.py startproject --template={} {} {}'.format(
                 self.template, self.name, self.full_destination))
-
-        run('touch {}/settings/active.py'.format(self.full_destination, self.name))
-
+        run('touch {}/settings/active.py'.format(
+                self.full_destination, self.name))
 
     def deploy(self):
         """
