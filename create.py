@@ -24,7 +24,7 @@ class Command(object):
 
         (options, args) = parser.parse_args()
 
-        self.template = options.template or 'django-foundation'
+        self.template = options.template or 'https://github.com/suneel0101/django-foundation/archive/master.zip'
         self.name = options.name
         self.destination = options.path
 
@@ -49,7 +49,6 @@ class Command(object):
         Activate virtual environment
         Install Django
         """
-        run('git clone git://github.com/suneel0101/django-foundation.git')
         run('virtualenv venv --distribute')
         run('source venv/bin/activate')
         run('pip install django')
