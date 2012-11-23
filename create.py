@@ -65,7 +65,11 @@ class ProjectHelper(object):
 
         # Change directory into newly created project directory
         os.chdir(self.full_destination)
-        #self.deploy()
+        options_dict = {
+            'emailer': options.emailer,
+            'compass': options.compass,
+        }
+        self.deploy(**options_dict)
 
     def get_options_and_args(self):
         """
@@ -250,7 +254,7 @@ class ProjectHelper(object):
         current_settings.update(settings_dict)
         self.rewrite_settings(current_settings)
 
-    def deploy(self):
+    def deploy(self, *args, **kwargs):
         """
         Initialize a git repo.
         Create a Heroku app.
@@ -262,8 +266,9 @@ class ProjectHelper(object):
         run("git add . && git commit -m 'pushing to heroku'")
         run("git push heroku master")
         run("heroku ps:scale web=1")
-        run("heroku run python manage.py syncdb")
-        run("heroku run python manage.py migrate")
+        run("heroku addons:add heroku-postgresql:dev")
+        if kwargs.get('emailer'):
+            run("heroku addons:add sendgrid:starter")
         run("heroku open")
 
 if __name__ == "__main__":
