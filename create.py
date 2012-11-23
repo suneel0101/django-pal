@@ -7,6 +7,10 @@ def run(*args, **kwargs):
     call(*args, shell=True, **kwargs)
 
 
+def is_settings_variable(var_name):
+    return not (var_name.startswith("__") and var_name.endswith("__"))
+
+
 class Command(object):
     def main(self):
 
@@ -79,6 +83,37 @@ class Command(object):
         run('mkdir {}'.format(emailer_destination))
         run('django-admin.py startapp emailer {} --template={}'.format(
                 emailer_destination, EMAILER_TEMPLATE))
+        self.add_installed_app('emailer')
+        emailer_config_vars = {}
+        self.add_to_settings(emailer_config_vars)
+
+    def get_current_settings(self):
+        f = open('{}/settings/common.py'.format(self.full_destination), 'r+')
+        g = open('temp_settings.py', 'w+')
+        for line in f:
+            g.write(line)
+        f.close()
+        g.close()
+        import temp_settings
+        var_names = [x for x in dir(temp_settings) if is_settings_variable(x)]
+        var_dict = {x: getattr(temp_settings, x) for x in var_names}
+        run("rm temp_settings.py")
+        return var_dict
+
+    def add_installed_app(self, app_name):
+        var_dict = self.get_current_settings()
+        var_dict['INSTALLED_APPS'] += (app_name,)
+        self.rewrite_settings(var_dict)
+
+    def rewrite_settings(self, settings_dict):
+        h = open('{}/settings/common.py'.format(self.full_destination), 'w+')
+        for x, y in settings_dict.iteritems():
+            h.write("{} = {}\n".format(x, y))
+        h.close()
+
+    def add_to_settings(self, settings_dict):
+        current_settings = self.get_current_settings()
+        current_settings.update(settings_dict)
 
     def deploy(self):
         """
