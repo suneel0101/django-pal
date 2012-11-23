@@ -11,7 +11,25 @@ def run(*args, **kwargs):
 
 
 def is_settings_variable(var_name):
+    """
+    All of the accessible variables in settings will
+    be precisely those that are not of the form __*__
+    """
     return not (var_name.startswith("__") and var_name.endswith("__"))
+
+
+def get_lines_from_file(path):
+    f = open(path, 'r+')
+    lines = [line for line in f]
+    f.close()
+    return lines
+
+
+def rewrite_file(path, lines):
+    f = open(path, 'r+')
+    for line in lines:
+        f.write(line)
+    f.close()
 
 
 class CodeLiteral(object):
@@ -142,6 +160,25 @@ class ProjectHelper(object):
         os.chdir(media_destination)
         run("compass create --sass-dir 'sass' --css-dir 'css'")
         os.chdir(original_cwd)
+        os.chdir(self.full_destination)
+        run("gem install compass_twitter_bootstrap")
+
+        # Add import to screen.scss
+        compass_import = '@import "compass_twitter_bootstrap";'
+        scss_path = '{}/media/sass/screen.scss'.format(self.full_destination)
+        scss_lines = get_lines_from_file(scss_path)
+        scss_lines.append("{}\n".format(compass_import))
+        rewrite_file(scss_path, scss_lines)
+
+        # Add require to config.rb
+        config_require = "require 'compass_twitter_bootstrap'"
+        config_path = '{}/media/config.rb'.format(self.full_destination)
+        config_lines = get_lines_from_file(config_path)
+        config_lines = ["{}\n".format(config_require)] + config_lines
+        rewrite_file(config_path, config_lines)
+
+        # Return to original directory before exiting
+        os.chdir(original_cwd)
 
     def get_current_settings(self):
         """
@@ -152,12 +189,14 @@ class ProjectHelper(object):
         g = open('temp_settings.py', 'w+')
         import_statements = []
         for line in f:
+            # Extract import statements
             if 'import' in line:
                 import_statements.append(line.strip())
             else:
                 g.write(line)
         f.close()
         g.close()
+
         import temp_settings
         var_names = [x for x in dir(temp_settings) if is_settings_variable(x)]
         var_dict = {x: getattr(temp_settings, x) for x in var_names}
