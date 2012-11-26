@@ -28,7 +28,7 @@ run the `create` command with `--compass`
 
 This will create a compass project under media/ and will also have compass version of Twitter Bootstrap already imported into screen.scss as per https://github.com/vwall/compass-twitter-bootstrap.
 
-## Emailer App
+## Emailer App (with automatic Sendgrid integration)
 
 run the `create` command with `--emailer`
 
