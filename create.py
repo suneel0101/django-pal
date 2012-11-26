@@ -4,6 +4,7 @@ from subprocess import call
 
 DEFAULT_TEMPLATE = 'https://github.com/suneel0101/django-foundation/archive/master.zip'
 EMAILER_TEMPLATE = "https://github.com/suneel0101/django-emailer/archive/master.zip"
+REDIS_REPO_NAME_AND_URL = ('django-pal-redis-helper', "git://github.com/suneel0101/django-pal-redis-helper.git")
 
 
 def run(*args, **kwargs):
@@ -62,6 +63,12 @@ class ProjectHelper(object):
             self.add_emailer()
         if options.compass:
             self.add_compass()
+        if options.redis:
+            self.create_app('util')
+            self.add_to_app(
+                app_name='util',
+                repo_name_and_url=REDIS_REPO_NAME_AND_URL,
+                paths=['rediz.py'])
 
         # Change directory into newly created project directory
         os.chdir(self.full_destination)
@@ -92,6 +99,10 @@ class ProjectHelper(object):
         parser.add_option("-c", "--compass", dest="compass",
                           action="store_true",
                           help="add compass")
+        parser.add_option("-r", "--redis", dest="redis",
+                          action="store_true",
+                          help="add redis")
+
 
         return parser.parse_args()
 
@@ -129,6 +140,39 @@ class ProjectHelper(object):
                 self.template, self.name, self.full_destination))
         run('touch {}/settings/active.py'.format(
                 self.full_destination, self.name))
+
+    def create_app(self, app_name):
+        """
+        Creates app named `app_name` under apps/ unless it already exists.
+        """
+        app_destination = '{}/apps/{}'.format(self.full_destination, app_name)
+        if not os.path.exists(app_destination):
+            run('mkdir {}'.format(app_destination))
+            run('touch {}/__init__.py'.format(app_destination))
+        else:
+            print "Can't create {} because it already exists!".format(
+                app_destination)
+
+    def add_to_app(self, app_name, repo_name_and_url, paths):
+        """
+        Adds files from any arbitrary repo to an existing app
+        within your project.
+        """
+        if os.path.exists("{}/apps/{}".format(
+                self.full_destination,
+                app_name)):
+            name, url = repo_name_and_url
+            run("git clone {}".format(url))
+            for path in paths:
+                relative_path = "{}/{}".format(name, path)
+                run("cp {} {}/apps/{}/{}".format(
+                        relative_path,
+                        self.full_destination,
+                        app_name,
+                        path))
+            run("rm -rf {}".format(name))
+        else:
+            print "Can't add to app {} because it doesn't exist!".format(app_name)
 
     def add_emailer(self):
         """
