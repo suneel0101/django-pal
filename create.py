@@ -1,6 +1,6 @@
+import subprocess
 import os
 from optparse import OptionParser
-from subprocess import call
 from types import ModuleType
 
 DEFAULT_TEMPLATE = 'https://github.com/suneel0101/django-foundation/archive/master.zip'
@@ -9,7 +9,7 @@ REDIS_REPO_NAME_AND_URL = ('django-pal-redis-helper', "git://github.com/suneel01
 
 
 def run(*args, **kwargs):
-    call(*args, shell=True, **kwargs)
+    subprocess.call(*args, shell=True, **kwargs)
 
 
 def is_settings_variable(settings, var_name):
@@ -77,7 +77,7 @@ class ProjectHelper(object):
             'compass': options.compass,
             'redis': options.redis,
         }
-        #self.deploy(**options_dict)
+        self.deploy(**options_dict)
 
     def get_options_and_args(self):
         """
@@ -337,12 +337,34 @@ class ProjectHelper(object):
         run('heroku create')
         run("git add . && git commit -m 'pushing to heroku'")
         run("git push heroku master")
+
+        # Scale web process
         run("heroku ps:scale web=1")
+
+        # Add POSTGRESQL database
         run("heroku addons:add heroku-postgresql:dev")
+
+        # Promote database so DATABASE_URL is set
+        x = subprocess.Popen(["heroku config | grep HEROKU_POSTGRESQL"],
+                             shell=True,
+                             stdout=subprocess.PIPE)
+        postgres_url_info = x.communicate()[0]
+        heroku_postgres_url = postgres_url_info.split(":")[0]
+        run("heroku pg:promote {}".format(heroku_postgres_url))
+
+        # Sync and migrate db
+        run("heroku run python manage.py syncdb")
+        run("heroku run python manage.py migrate")
+
+        # Add Sendgrid
         if kwargs.get('emailer'):
             run("heroku addons:add sendgrid:starter")
+
+        # Add Redis To Go
         if kwargs.get('redis'):
             run("heroku addons:add redistogo:nano")
+
+        # Open app in browser
         run("heroku open")
 
 if __name__ == "__main__":
