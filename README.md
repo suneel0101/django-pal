@@ -34,17 +34,9 @@ run the `create` command with `--emailer`
 
 This will create a django-emailer app (https://github.com/suneel0101/django-emailer) called `emailer` under apps/
 
-Setting up your Heroku Database
-============
-Do this after deploying.
+## Redis (with automatic Heroku Redis To Go integration)
 
-1. `heroku addons:add heroku-postgresql:dev`
-2. `heroku config | grep HEROKU_POSTGRESQL`
-The output of #2 will be of the form HEROKU_POSTGRESQL_RED_URL: postgres://...., but instead of red, yours might be SILVER, PINK or something else.
-3. `heroku pg:promote HEROKU_POSTGRESQL_****_URL` (`heroku pg:promote HEROKU_POSTGRESQL_RED_URL`, for example)
-4. `heroku run python manage.py syncdb` (Create a superuser for your live database)
-5. `heroku run python manage.py migrate`
-
+This will add a file under apps/util called rediz.py that has some basic and useful helpers for Redis usage (https://github.com/suneel0101/django-pal-redis-helper)
 
 Dependencies
 ============
