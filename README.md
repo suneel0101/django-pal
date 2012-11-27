@@ -21,6 +21,7 @@ Step 5 will install requirements within your virtualenv and sync and migrate the
 
 Addons
 ============
+You may find the following addons helpful in developing your application. Adding them is as easy as including a flag in the create command. Use as many of the following as you like.
 
 ## Compass Project (with Twitter Bootstrap)
 
@@ -35,6 +36,8 @@ run the `create` command with `--emailer`
 This will create a django-emailer app (https://github.com/suneel0101/django-emailer) called `emailer` under apps/
 
 ## Redis (with automatic Heroku Redis To Go integration)
+
+run the `create` command with `--redis`
 
 This will add a file under apps/util called rediz.py that has some basic and useful helpers for Redis usage (https://github.com/suneel0101/django-pal-redis-helper)
 
