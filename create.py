@@ -1,3 +1,5 @@
+from boto.s3.connection import S3Connection
+import time
 import subprocess
 import os
 from optparse import OptionParser
@@ -72,6 +74,7 @@ class ProjectHelper(object):
         self.create_project()
 
         # Add-ons
+        env_vars = {}
         if options.emailer or options.all:
             self.add_emailer()
         if options.compass or options.all:
@@ -81,7 +84,15 @@ class ProjectHelper(object):
             self.add_redis()
         if options.newrelic or options.all:
             self.add_newrelic()
-
+        if options.aws or options.all:
+            if not (options.aws_id and options.aws_key):
+                raise ValueError("Must set --awsid and --awskey to your AWS ID and AWS SECRET KEY, respectively")
+            bucket_name = self.add_aws(options.aws_id, options.aws_key)
+            env_vars.update({
+                'AWS_ACCESS_KEY_ID': options.aws_id,
+                'AWS_SECRET_ACCESS_KEY': options.aws_key,
+                'AWS_BUCKET_NAME': bucket_name,
+            })
         # Change directory into newly created project directory
         os.chdir(self.full_destination)
         options_dict = {
@@ -91,7 +102,8 @@ class ProjectHelper(object):
             'newrelic': options.newrelic,
             'all': options.all,
         }
-        self.deploy(**options_dict)
+
+        self.deploy(env_vars=env_vars, **options_dict)
 
     def get_options_and_args(self):
         """
@@ -123,6 +135,15 @@ class ProjectHelper(object):
         parser.add_option("-a", "--all", dest="all",
                           action="store_true",
                           help="add all addons")
+        parser.add_option("-s", "--aws", dest="aws",
+                          action="store_true",
+                          help="add AWS S3 integration for static assets")
+        parser.add_option("-i", "--awsid", dest="aws_id",
+                          action="store", type="string",
+                          help="AWS ID")
+        parser.add_option("-k", "--awskey", dest="aws_key",
+                          action="store", type="string",
+                          help="AWS SECRET KEY")
 
         return parser.parse_args()
 
@@ -206,6 +227,24 @@ class ProjectHelper(object):
         self.add_to_settings(redis_settings)
         self.add_requirement('redis==2.6.2')
 
+    def add_aws(self, aws_id, aws_secret_key):
+        """
+        AWS S3 ntegration on production for serving media
+        """
+        conn = S3Connection(aws_id, aws_secret_key)
+        bucket_name = "{}-{}".format(self.name, time.time())
+        conn.create_bucket(bucket_name)
+        self.add_imports(['import os'], env='production')
+        aws_settings = {
+            'AWS_ACCESS_KEY_ID': CodeLiteral("os.environ.get('AWS_ACCESS_KEY_ID')"),
+            'AWS_SECRET_ACCESS_KEY': CodeLiteral("os.environ.get('AWS_SECRET_ACCESS_KEY')"),
+            'AWS_BUCKET_NAME': CodeLiteral("os.environ.get('AWS_BUCKET_NAME')"),
+            'MEDIA_URL': CodeLiteral("'http://s3.amazonaws.com/{}/'.format(AWS_BUCKET_NAME)"),
+            'DATABASES': CodeLiteral("{'default': dj_database_url.config(default='postgres://localhost')}"),
+        }
+        self.add_to_settings(aws_settings, env='production')
+        return bucket_name
+
     def add_newrelic(self):
         self.add_requirement('newrelic==1.1.0.192')
         procfile_path = '{}/Procfile'.format(self.full_destination)
@@ -267,13 +306,13 @@ class ProjectHelper(object):
         # Return to original directory before exiting
         os.chdir(original_cwd)
 
-    def get_current_settings(self):
+    def get_current_settings(self, env):
         """
         Reads the common settings file and
         gets all the settings variable names and values.
         """
 
-        settings_path = '{}/settings/common.py'.format(self.full_destination)
+        settings_path = '{}/settings/{}.py'.format(self.full_destination, env)
         f = open(settings_path, 'r+')
         run("cp {} .".format(settings_path))
         # g = open('temp_settings.py', 'w+')
@@ -284,38 +323,44 @@ class ProjectHelper(object):
                 import_statements.append(line.strip())
         f.close()
 
-        run("rm common.pyc")
-        import common
-        reload(common)
+        run("rm {}.pyc".format(env))
+        if env == 'common':
+            import common
+            reload(common)
+            settings_module = common
+        elif env == 'production':
+            import production
+            reload(production)
+            settings_module = production
 
-        var_names = [x for x in dir(common) if is_settings_variable(common, x)]
-        var_dict = {x: getattr(common, x) for x in var_names}
-        run("rm common.py")
+        var_names = [x for x in dir(settings_module) if is_settings_variable(settings_module, x)]
+        var_dict = {x: getattr(settings_module, x) for x in var_names}
+        run("rm {}.py".format(env))
         var_dict['import_statements'] = import_statements
         return var_dict
 
-    def add_imports(self, imports):
-        settings_dict = self.get_current_settings()
+    def add_imports(self, imports, env='common'):
+        settings_dict = self.get_current_settings(env=env)
         settings_dict['import_statements'] = list(
             set(settings_dict['import_statements'] + imports))
-        self.rewrite_settings(settings_dict)
+        self.rewrite_settings(settings_dict, env=env)
 
-    def add_installed_app(self, app_name):
+    def add_installed_app(self, app_name, env='common'):
         """
         Adds `app_name` to INSTALLED_APPS in settings.common
         """
-        var_dict = self.get_current_settings()
+        var_dict = self.get_current_settings(env=env)
         installed_apps = var_dict['INSTALLED_APPS']
         if app_name not in installed_apps:
             var_dict['INSTALLED_APPS'] = installed_apps + (app_name,)
-        self.rewrite_settings(var_dict)
+        self.rewrite_settings(var_dict, env=env)
 
-    def rewrite_settings(self, settings_dict):
+    def rewrite_settings(self, settings_dict, env):
         """
         Completely Rewrites settings with the variables and
         their values from settings_dict.
         """
-        h = open('{}/settings/common.py'.format(self.full_destination), 'w+')
+        h = open('{}/settings/{}.py'.format(self.full_destination, env), 'w+')
         import_statements = settings_dict['import_statements']
         del settings_dict['import_statements']
         settings_dict.keys().sort()
@@ -334,14 +379,14 @@ class ProjectHelper(object):
             h.write(line_to_write)
         h.close()
 
-    def add_to_settings(self, settings_dict):
+    def add_to_settings(self, settings_dict, env='common'):
         """
         Adds variables and their values in settings_dict
         as settings variables in settings.common
         """
-        current_settings = self.get_current_settings()
+        current_settings = self.get_current_settings(env=env)
         current_settings.update(settings_dict)
-        self.rewrite_settings(current_settings)
+        self.rewrite_settings(current_settings, env=env)
 
     def add_requirement(self, requirement):
         """
@@ -394,6 +439,10 @@ class ProjectHelper(object):
         # Add NewRelic Standard
         if kwargs.get('newrelic') or _all:
             run("heroku addons:add newrelic:standard")
+
+        env_vars = kwargs.get('env_vars', {})
+        for k, v in env_vars.iteritems():
+            run("heroku config:set {}={}".format(k, v))
 
         # Open app in browser
         run("heroku open")
