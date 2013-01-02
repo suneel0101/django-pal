@@ -36,6 +36,14 @@ def rewrite_file(path, lines):
     f.close()
 
 
+def create_directory(path):
+    """
+    Will create the directory if it doesn't already exist.
+    """
+    if not os.path.exists(path):
+        run("mkdir {}".format(path))
+
+
 class CodeLiteral(object):
     """
     Code stored as a string
@@ -57,18 +65,22 @@ class ProjectHelper(object):
         self.name = options.name
         self.destination = self.normalize_destination(options.path)
         self.full_destination = "{}{}".format(self.destination, self.name)
+        create_directory(self.destination)
+        create_directory(self.full_destination)
 
         self.prepare()
         self.create_project()
 
         # Add-ons
-        if options.emailer:
+        if options.emailer or options.all:
             self.add_emailer()
-        if options.compass:
+        if options.compass or options.all:
             self.add_compass()
-        if options.redis:
+        if options.redis or options.all:
             self.create_app('util')
             self.add_redis()
+        if options.newrelic or options.all:
+            self.add_newrelic()
 
         # Change directory into newly created project directory
         os.chdir(self.full_destination)
@@ -76,6 +88,8 @@ class ProjectHelper(object):
             'emailer': options.emailer,
             'compass': options.compass,
             'redis': options.redis,
+            'newrelic': options.newrelic,
+            'all': options.all,
         }
         self.deploy(**options_dict)
 
@@ -103,7 +117,12 @@ class ProjectHelper(object):
         parser.add_option("-r", "--redis", dest="redis",
                           action="store_true",
                           help="add redis")
-
+        parser.add_option("-w", "--newrelic", dest="newrelic",
+                          action="store_true",
+                          help="add newrelic")
+        parser.add_option("-a", "--all", dest="all",
+                          action="store_true",
+                          help="add all addons")
 
         return parser.parse_args()
 
@@ -186,6 +205,13 @@ class ProjectHelper(object):
         redis_settings = {'REDIS_CONNECTION': CodeLiteral("os.environ.get('REDISTOGO_URL')")}
         self.add_to_settings(redis_settings)
         self.add_requirement('redis==2.6.2')
+
+    def add_newrelic(self):
+        self.add_requirement('newrelic==1.1.0.192')
+        procfile_path = '{}/Procfile'.format(self.full_destination)
+        rewrite_file(
+            procfile_path,
+            ["web: newrelic-admin run-program python manage.py run_gunicorn -b 0.0.0.0:\$PORT"])
 
     def add_emailer(self):
         """
@@ -333,6 +359,7 @@ class ProjectHelper(object):
         Push to Heroku.
         Scale the web process.
         """
+        _all = kwargs.get('all')
         run('git init')
         run('heroku create')
         run("git add . && git commit -m 'pushing to heroku'")
@@ -357,12 +384,16 @@ class ProjectHelper(object):
         run("heroku run python manage.py migrate")
 
         # Add Sendgrid
-        if kwargs.get('emailer'):
+        if kwargs.get('emailer') or _all:
             run("heroku addons:add sendgrid:starter")
 
         # Add Redis To Go
-        if kwargs.get('redis'):
+        if kwargs.get('redis') or _all:
             run("heroku addons:add redistogo:nano")
+
+        # Add NewRelic Standard
+        if kwargs.get('newrelic') or _all:
+            run("heroku addons:add newrelic:standard")
 
         # Open app in browser
         run("heroku open")
