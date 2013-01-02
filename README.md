@@ -23,6 +23,10 @@ Addons
 ============
 You may find the following addons helpful in developing your application. Adding them is as easy as including a flag in the create command. Use as many of the following as you like.
 
+## All Addons
+
+run the `create` command with `--all` to get easily add all of the below addons.
+
 ## Compass Project (with Twitter Bootstrap)
 
 run the `create` command with `--compass`
@@ -40,6 +44,12 @@ This will create a django-emailer app (https://github.com/suneel0101/django-emai
 run the `create` command with `--redis`
 
 This will add a file under apps/util called rediz.py that has some basic and useful helpers for Redis usage (https://github.com/suneel0101/django-pal-redis-helper)
+
+## NewRelic
+
+run the `create` command with `--newrelic`
+
+This will automatically add free NewRelic tracking to your web application. Checkout the NewRelic on Heroku here: https://addons.heroku.com/newrelic.
 
 Dependencies
 ============
