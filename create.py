@@ -407,6 +407,11 @@ class ProjectHelper(object):
         _all = kwargs.get('all')
         run('git init')
         run('heroku create')
+
+        # Compile scss
+        if kwargs.get('compass') or _all:
+            run("compass compile media")
+
         run("git add . && git commit -m 'pushing to heroku'")
         run("git push heroku master")
 
@@ -440,13 +445,13 @@ class ProjectHelper(object):
         if kwargs.get('newrelic') or _all:
             run("heroku addons:add newrelic:standard")
 
-        # Sync to S3
-        if kwargs.get('aws') or _all:
-            run("heroku run python manage.py sync_media_s3")
-
         env_vars = kwargs.get('env_vars', {})
         for k, v in env_vars.iteritems():
             run("heroku config:set {}={}".format(k, v))
+
+        # Sync to S3
+        if kwargs.get('aws') or _all:
+            run("heroku run python manage.py sync_media_s3")
 
         # Open app in browser
         run("heroku open")
