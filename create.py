@@ -440,6 +440,10 @@ class ProjectHelper(object):
         if kwargs.get('newrelic') or _all:
             run("heroku addons:add newrelic:standard")
 
+        # Sync to S3
+        if kwargs.get('aws') or _all:
+            run("heroku run python manage.py sync_media_s3")
+
         env_vars = kwargs.get('env_vars', {})
         for k, v in env_vars.iteritems():
             run("heroku config:set {}={}".format(k, v))
