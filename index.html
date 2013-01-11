@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Django-pal : " />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Django-pal</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/suneel0101/django-pal">View on GitHub</a>
+
+          <h1 id="project_title">Django-pal</h1>
+          <h2 id="project_tagline"></h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/suneel0101/django-pal/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/suneel0101/django-pal/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>Django-Pal</h1>
+
+<p>Django-Pal does two things.</p>
+
+<ol>
+<li>It creates a Django project based on the Django project template in <a href="http://github.com/suneel0101/django-foundation">http://github.com/suneel0101/django-foundation</a>.</li>
+<li>Then, it deploys to Heroku.</li>
+</ol><h1>Instructions to Create and Deploy</h1>
+
+<ol>
+<li><code>git clone git://github.com/suneel0101/django-pal.git &amp;&amp; cd django-pal</code></li>
+<li><code>python create.py --path="/path/to/proj/directory/" --name="your-project-name"</code></li>
+</ol><p>Now, your application is deployed to Heroku. Now, setup your local development enviornment:</p>
+
+<ol>
+<li><code>cd /path/to/proj/directory</code></li>
+<li><code>virtualenv venv --distribute &amp;&amp; . venv/bin/activate</code></li>
+<li><code>make</code></li>
+</ol><p>Step 5 will install requirements within your virtualenv and sync and migrate the database. Finally, it will runserver.</p>
+
+<h1>Addons</h1>
+
+<p>You may find the following addons helpful in developing your application. Adding them is as easy as including a flag in the create command. Use as many of the following as you like.</p>
+
+<h2>All Addons</h2>
+
+<p>run the <code>create</code> command with <code>--all</code> to get easily add all of the below addons.</p>
+
+<h2>Compass Project (with Twitter Bootstrap)</h2>
+
+<p>run the <code>create</code> command with <code>--compass</code></p>
+
+<p>This will create a compass project under media/ and will also have compass version of Twitter Bootstrap already imported into screen.scss as per <a href="https://github.com/vwall/compass-twitter-bootstrap">https://github.com/vwall/compass-twitter-bootstrap</a>.</p>
+
+<h2>Emailer App (with automatic Sendgrid integration)</h2>
+
+<p>run the <code>create</code> command with <code>--emailer</code></p>
+
+<p>This will create a django-emailer app (<a href="https://github.com/suneel0101/django-emailer">https://github.com/suneel0101/django-emailer</a>) called <code>emailer</code> under apps/</p>
+
+<h2>Redis (with automatic Heroku Redis To Go integration)</h2>
+
+<p>run the <code>create</code> command with <code>--redis</code></p>
+
+<p>This will add a file under apps/util called rediz.py that has some basic and useful helpers for Redis usage (<a href="https://github.com/suneel0101/django-pal-redis-helper">https://github.com/suneel0101/django-pal-redis-helper</a>)</p>
+
+<h2>NewRelic</h2>
+
+<p>run the <code>create</code> command with <code>--newrelic</code></p>
+
+<p>This will automatically add free NewRelic tracking to your web application. Checkout the NewRelic on Heroku here: <a href="https://addons.heroku.com/newrelic">https://addons.heroku.com/newrelic</a>.</p>
+
+<h1>Dependencies</h1>
+
+<ol>
+<li>Heroku account and toolbelt</li>
+<li>git</li>
+<li>pip</li>
+</ol>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Django-pal maintained by <a href="https://github.com/suneel0101">suneel0101</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
