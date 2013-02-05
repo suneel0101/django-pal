@@ -33,11 +33,9 @@ python django_pal_create.py --path="/Users/suneel0101/Development/" --name="samp
 
 Now, your application is deployed to Heroku. Now, setup your local development enviornment:
 
-3. `cd /path/to/proj/directory`
-4. `virtualenv venv --distribute && . venv/bin/activate`
-5. `make`
-
-Step 5 will install requirements within your virtualenv and sync and migrate the database. Finally, it will runserver.
+1. `cd /path/to/proj/directory`
+2. `virtualenv venv --distribute && . venv/bin/activate`
+3. `make`
 
 ## Addons
 
