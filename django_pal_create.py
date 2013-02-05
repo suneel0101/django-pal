@@ -284,6 +284,7 @@ class ProjectHelper(object):
         media_destination = "{}/media".format(self.full_destination)
         run("mkdir {}".format(media_destination))
         os.chdir(media_destination)
+        run("gem install compass")
         run("compass create --sass-dir 'sass' --css-dir 'css'")
         os.chdir(original_cwd)
         os.chdir(self.full_destination)
@@ -417,9 +418,6 @@ class ProjectHelper(object):
 
         # Scale web process
         run("heroku ps:scale web=1")
-
-        # Add POSTGRESQL database
-        run("heroku addons:add heroku-postgresql:dev")
 
         # Promote database so DATABASE_URL is set
         x = subprocess.Popen(["heroku config | grep HEROKU_POSTGRESQL"],
