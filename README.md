@@ -9,6 +9,7 @@ It also gives you the option of automatically integrating thirdparty services su
 python django_pal_create.py requires the following parameters
 
 `--path`: (String) path to the directory where you want your application to be created
+
 `--name`: (String) name of the project
 
 Sample usage:
@@ -109,7 +110,9 @@ Ideally in production you don’t want your static assets to be served by the dj
 This will create a bucket, upload your static assets to it and your live site will be configured to serve static assets from S3 by setting the appropriate settings variables. You don’t have to worry about the pain or hassle of doing this manually. You just have to do is pass in all the following parameters:
 
 `--aws (no value)`
+
 `--awsid (String): AWS Access Key ID`
+
 `--awskey (String): AWS Secret Access Key`
 
 Your AWS Access Key Id and Secret Access Key can be found in your account credentials section after logging into aws.amazon.com
@@ -123,7 +126,9 @@ python django_pal_create.py --path="/Users/suneel0101/Development/" --name="samp
 
 If you want all the above, you just pass in the following parameters:
 `--all`
+
 `--awsid (String)`
+
 `--awskey (string)`
 
 Sample usage:
