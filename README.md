@@ -125,6 +125,7 @@ python django_pal_create.py --path="/Users/suneel0101/Development/" --name="samp
 ### 6. All
 
 If you want all the above, you just pass in the following parameters:
+
 `--all`
 
 `--awsid (String)`
