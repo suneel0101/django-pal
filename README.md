@@ -106,10 +106,10 @@ Ideally in production you don’t want your static assets to be served by the dj
 This will create a bucket, upload your static assets to it and your live site will be configured to serve static assets from S3 by setting the appropriate settings variables. You don’t have to worry about the pain or hassle of doing this manually. You just have to do is pass in all the following parameters:
 
 `--aws (no value)`
-`--awsid (String): AWS ID`
-`--awskey (String): AWS Secret Key`
+`--awsid (String): AWS Access Key ID`
+`--awskey (String): AWS Secret Access Key`
 
-Your AWS ID and Secret Key can be found in your account credentials section after logging into aws.amazon.com
+Your AWS Access Key Id and Secret Access Key can be found in your account credentials section after logging into aws.amazon.com
 
 Sample usage:
 ```
