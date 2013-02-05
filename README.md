@@ -25,7 +25,10 @@ python django_pal_create.py --path="/Users/suneel0101/Development/" --name="samp
 ## Instructions to Create and Deploy
 
 1. `git clone git://github.com/suneel0101/django-pal.git && cd django-pal`
-2. `python django_pal_create.py --path="/path/to/proj/directory/" --name="your-project-name"`
+2. `virtualenv djangopalenv --distribute && . djangopalenv/bin/activate`
+3. `pip install -r requirements.txt`
+4. `python django_pal_create.py --path="/path/to/proj/directory/" --name="your-project-name"`
+5. `deactivate`
 
 Now, your application is deployed to Heroku. Now, setup your local development enviornment:
 
