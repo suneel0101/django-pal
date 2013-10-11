@@ -84,6 +84,8 @@ class ProjectHelper(object):
             self.add_redis()
         if options.newrelic or options.all:
             self.add_newrelic()
+        if options.all:
+            self.add_sentry()
         if options.aws or options.all:
             if not (options.aws_id and options.aws_key):
                 raise ValueError("Must set --awsid and --awskey to your AWS ID and AWS SECRET KEY, respectively")
@@ -251,6 +253,10 @@ class ProjectHelper(object):
         rewrite_file(
             procfile_path,
             ["web: newrelic-admin run-program python manage.py run_gunicorn -b 0.0.0.0:\$PORT"])
+
+    def add_sentry(self):
+        self.add_installed_app('raven.contrib.django.raven_compat')
+        self.add_requirement('raven>=3')
 
     def add_emailer(self):
         """
@@ -438,6 +444,10 @@ class ProjectHelper(object):
         # Add Redis To Go
         if kwargs.get('redis') or _all:
             run("heroku addons:add redistogo:nano")
+
+        # Always add Sentry
+        if _all:
+            run("heroku addons:add sentry:developer")
 
         # Add NewRelic Standard
         if kwargs.get('newrelic') or _all:
