@@ -77,8 +77,8 @@ class ProjectHelper(object):
         env_vars = {}
         if options.emailer or options.all:
             self.add_emailer()
-        if options.compass or options.all:
-            self.add_compass()
+        # if options.compass or options.all:
+        #     self.add_compass()
         if options.redis or options.all:
             self.create_app('util')
             self.add_redis()
