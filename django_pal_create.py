@@ -38,7 +38,7 @@ class ProjectHelper(object):
         os.chdir(self.full_destination)
 
         # Deploy to Heroku
-        # self.deploy()
+        self.deploy()
 
     def get_options_and_args(self):
         """
